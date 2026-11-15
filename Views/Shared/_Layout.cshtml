@@ -1,0 +1,68 @@
+@inject CalisTrack.Data.CalisTrackContext Db
+@{
+    var autenticado = User.Identity?.IsAuthenticated == true;
+    var rol = User.FindFirstValue(ClaimTypes.Role) ?? "";
+    var nombre = User.Identity?.Name ?? "";
+    var controlador = ViewContext.RouteData.Values["controller"]?.ToString();
+    var noLeidas = autenticado ? Db.Notificaciones.Count(n => n.UsuarioId == int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!) && !n.Leida) : 0;
+    string Activo(string c) => controlador == c ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b0d12" />
+    <title>@ViewData["Title"] · CalisTrack</title>
+    <link rel="icon" href="~/img/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+</head>
+<body class="@(autenticado ? "app-body" : "auth-body")" data-role="@rol">
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
+@if (autenticado)
+{
+    <aside class="sidebar" id="sidebar">
+        <a class="brand" asp-controller="Inicio" asp-action="Index"><img src="~/img/logo.svg" alt="" /><span>CalisTrack</span></a>
+        <span class="sidebar-label">@(rol == Roles.SuperAdmin ? "Super Admin" : rol)</span>
+        <nav aria-label="Menú principal">
+            <a class="nav-item @Activo("Inicio")" asp-controller="Inicio" asp-action="Index"><svg><use href="/img/icons.svg#home" /></svg>Inicio</a>
+            @if (rol == Roles.Entrenador)
+            {
+                <a class="nav-item @Activo("Alumnos")" asp-controller="Alumnos" asp-action="Index"><svg><use href="/img/icons.svg#users" /></svg>Mis alumnos</a>
+                <a class="nav-item @Activo("Rutinas")" asp-controller="Rutinas" asp-action="Index"><svg><use href="/img/icons.svg#routine" /></svg>Rutinas</a>
+                <a class="nav-item @Activo("Biblioteca")" asp-controller="Biblioteca" asp-action="Index"><svg><use href="/img/icons.svg#book" /></svg>Biblioteca</a>
+            }
+            @if (rol == Roles.Alumno)
+            {
+                <a class="nav-item @Activo("Rutinas")" asp-controller="Rutinas" asp-action="MiRutina"><svg><use href="/img/icons.svg#routine" /></svg>Mi rutina</a>
+                <a class="nav-item @Activo("Historial")" asp-controller="Historial" asp-action="Index"><svg><use href="/img/icons.svg#chart" /></svg>Historial y progreso</a>
+            }
+            @if (rol == Roles.SuperAdmin)
+            {
+                <a class="nav-item @Activo("Usuarios")" asp-controller="Usuarios" asp-action="Index"><svg><use href="/img/icons.svg#users" /></svg>Usuarios</a>
+            }
+            @if (rol != Roles.SuperAdmin)
+            {
+                <a class="nav-item @Activo("Chat")" asp-controller="Chat" asp-action="Index"><svg><use href="/img/icons.svg#chat" /></svg>Chat</a>
+            }
+            <a class="nav-item @Activo("Notificaciones")" asp-controller="Notificaciones" asp-action="Index"><svg><use href="/img/icons.svg#bell" /></svg>Notificaciones @if(noLeidas > 0){<span class="nav-count">@noLeidas</span>}</a>
+        </nav>
+        <div class="sidebar-bottom">
+            <a class="profile-link" asp-controller="Cuenta" asp-action="Perfil"><span class="avatar">@Presentacion.Iniciales(nombre)</span><span><strong>@nombre</strong><small>@(rol == Roles.SuperAdmin ? "Super Admin" : rol)</small></span></a>
+            <form asp-controller="Cuenta" asp-action="Salir" method="post"><button class="logout" type="submit"><svg><use href="/img/icons.svg#logout" /></svg>Cerrar sesión</button></form>
+        </div>
+    </aside>
+    <div class="app-main">
+        <header class="topbar"><div class="topbar-left"><button type="button" class="icon-button mobile-toggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false"><svg><use href="/img/icons.svg#menu" /></svg></button></div><div class="topbar-right"><a class="icon-button notification-button" asp-controller="Notificaciones" asp-action="Index" aria-label="Notificaciones"><svg><use href="/img/icons.svg#bell" /></svg>@if(noLeidas > 0){<i></i>}</a><a class="avatar small" asp-controller="Cuenta" asp-action="Perfil" aria-label="Mi perfil">@Presentacion.Iniciales(nombre)</a></div></header>
+        <main id="contenido" class="page"><partial name="_Mensajes" />@RenderBody()</main>
+
+    </div>
+}
+else
+{
+    <partial name="_AuthIntro" /><main id="contenido" class="auth-main"><partial name="_Mensajes" />@RenderBody()</main>
+}
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

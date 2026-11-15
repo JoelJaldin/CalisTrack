@@ -1,0 +1,10 @@
+@model RegistroViewModel
+@{ ViewData["Title"] = "Crear cuenta"; }
+<div class="auth-card"><div class="auth-heading"><h1>Crear cuenta</h1><p>Sumate a CalisTrack.</p></div>
+<form method="post" class="form-stack"><div asp-validation-summary="ModelOnly" class="validation"></div>
+<div class="field"><label asp-for="Nombre">Nombre completo</label><input asp-for="Nombre" autocomplete="name" maxlength="100" required /><span asp-validation-for="Nombre"></span></div>
+<div class="field"><label asp-for="Email">Email</label><input asp-for="Email" autocomplete="username" type="email" maxlength="200" required /><span asp-validation-for="Email"></span></div>
+<div class="field"><label asp-for="Password">Contraseña</label><input asp-for="Password" autocomplete="new-password" minlength="8" maxlength="100" required /><small>Al menos 8 caracteres.</small><span asp-validation-for="Password"></span></div>
+<div class="field"><label asp-for="ConfirmarPassword">Repetir contraseña</label><input asp-for="ConfirmarPassword" autocomplete="new-password" required /><span asp-validation-for="ConfirmarPassword"></span></div>
+<fieldset class="role-picker"><legend>¿Cómo vas a usar CalisTrack?</legend><div class="role-options"><label><input asp-for="Rol" type="radio" value="Alumno" /><span><strong>Alumno</strong><small>Registro mis entrenamientos</small></span></label><label><input asp-for="Rol" type="radio" value="Entrenador" /><span><strong>Entrenador</strong><small>Gestiono alumnos y rutinas</small></span></label></div><span asp-validation-for="Rol"></span></fieldset>
+<button class="button primary full" type="submit">Crear cuenta</button></form><p class="auth-switch">¿Ya tenés cuenta? <a asp-action="Login">Iniciá sesión</a></p></div>

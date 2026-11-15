@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+.local/
+App_Data/
+appsettings.Local.json
+.env
+*.user
+*.log
+
+.env.*
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

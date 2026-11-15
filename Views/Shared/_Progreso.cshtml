@@ -1,0 +1,8 @@
+@model List<SemanaProgreso>
+@{ var maximo = Math.Max(1, Model.Select(s => s.Repeticiones).DefaultIfEmpty().Max()); }
+<div class="progress-chart" role="img" aria-label="Repeticiones completadas por semana">
+@foreach (var semana in Model)
+{
+    <div class="chart-column"><span>@semana.Repeticiones</span><div class="chart-track"><div class="chart-bar" style="height:@(semana.Repeticiones == 0 ? 0 : Math.Max(3, semana.Repeticiones * 100 / maximo))%"></div></div><small>@semana.Inicio.ToString("dd/MM")</small></div>
+}
+</div>

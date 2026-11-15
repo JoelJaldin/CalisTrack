@@ -1,0 +1,28 @@
+@model EntrenarViewModel
+@{ ViewData["Title"] = "Entrenamiento en curso"; var ejercicios = Model.Series.Select((serie, indice) => new { Serie = serie, Indice = indice }).GroupBy(s => s.Serie.RutinaEjercicioId).ToList(); }
+<div class="page-heading"><div><h1>Entrenamiento en curso</h1><p>@Model.NombreRutina · Fecha: @Model.Fecha.ToString("dd/MM/yyyy")</p></div></div>
+<form method="post" class="form-stack" id="training-form"><input asp-for="Id" type="hidden" /><div asp-validation-summary="All" class="validation" role="alert"></div>
+<div class="training-layout"><aside class="panel training-navigation"><span class="eyebrow">EJERCICIOS</span>
+@for(var n = 0; n < ejercicios.Count; n++)
+{
+    var grupo = ejercicios[n]; var serie = grupo.First().Serie;
+    <button class="training-tab @(n == 0 ? "selected" : "")" type="button" data-exercise-tab="ejercicio-@grupo.Key" aria-controls="ejercicio-@grupo.Key" aria-pressed="@(n == 0 ? "true" : "false")"><span class="step-number">@(n+1)</span><span><strong>@serie.NombreEjercicio</strong><small>@grupo.Count() × @serie.Objetivo</small></span></button>
+}
+<div class="session-count"><strong id="completed-count">@Model.Series.Count(s => s.Completada)</strong> / @Model.Series.Count series</div><div class="training-progress"><div id="training-progress-fill" style="width:@(Model.Series.Count == 0 ? 0 : Model.Series.Count(s => s.Completada) * 100 / Model.Series.Count)%"></div></div>
+<div class="rest-timer"><div><small>DESCANSO</small><strong id="timer-display" role="timer">00:00</strong></div><button type="button" id="timer-reset" class="text-button">Reiniciar</button></div></aside>
+<div>
+@for(var n = 0; n < ejercicios.Count; n++)
+{
+    var grupo = ejercicios[n]; var serie = grupo.First().Serie;
+    <section class="panel training-exercise" id="ejercicio-@grupo.Key"><div class="section-heading"><div><span class="eyebrow">EJERCICIO @(n+1) DE @ejercicios.Count</span><h2>@serie.NombreEjercicio</h2></div><a class="button secondary small-button" asp-controller="Rutinas" asp-action="Tecnica" asp-route-id="@grupo.Key" target="_blank" rel="noopener">Ver técnica</a></div><p class="muted">Objetivo: @grupo.Count() series × @serie.Objetivo repeticiones · descanso @serie.Descanso s</p>
+    <div class="table-wrap"><table class="series-table"><thead><tr><th>Serie</th><th>Objetivo</th><th>Repeticiones realizadas</th><th>Tiempo (seg)</th><th>Completada</th></tr></thead><tbody>
+    @foreach(var fila in grupo)
+    {
+        var i = fila.Indice;
+        <tr class="series-row @(fila.Serie.Completada ? "is-completed" : "")"><td><input asp-for="Series[i].Id" type="hidden" />@fila.Serie.NumeroSerie</td><td>@fila.Serie.Objetivo reps</td><td><label asp-for="Series[i].Repeticiones" class="sr-only">Repeticiones de la serie @fila.Serie.NumeroSerie</label><input asp-for="Series[i].Repeticiones" type="number" min="0" max="10000" required /></td><td><label asp-for="Series[i].TiempoSegundos" class="sr-only">Tiempo de la serie @fila.Serie.NumeroSerie</label><input asp-for="Series[i].TiempoSegundos" type="number" min="0" max="86400" placeholder="—" /></td><td><label class="series-check"><input asp-for="Series[i].Completada" data-series-check data-rest="@fila.Serie.Descanso" /><span class="sr-only">Serie @fila.Serie.NumeroSerie completada</span></label></td></tr>
+    }
+    </tbody></table></div><button type="button" class="text-button" data-start-rest="@serie.Descanso">Iniciar descanso</button></section>
+}
+<div class="field"><label asp-for="Comentario">Comentario (opcional)</label><textarea asp-for="Comentario" rows="3" maxlength="2000" placeholder="Contale a tu entrenador cómo te fue..."></textarea></div>
+<div class="training-bottom"><div class="field"><label asp-for="Fecha">Fecha del entrenamiento</label><input asp-for="Fecha" type="date" max="@Fecha.Hoy.ToString("yyyy-MM-dd")" required /></div><div class="form-actions"><a class="button secondary" asp-controller="Rutinas" asp-action="MiRutina">Volver</a><button class="button secondary" name="accion" value="guardar" type="submit">Guardar avance</button><button class="button primary" name="accion" value="finalizar" type="submit"><svg><use href="/img/icons.svg#check" /></svg>Finalizar entrenamiento</button></div></div><p class="help">Valores numéricos mayores o iguales a 0 · la fecha no puede ser futura.</p>
+</div></div></form>

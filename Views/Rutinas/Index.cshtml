@@ -1,0 +1,17 @@
+@model List<Rutina>
+@{ ViewData["Title"] = "Rutinas"; var asignaciones = (List<AsignacionRutina>)ViewBag.Asignaciones; bool inactivas = ViewBag.FiltrarInactivas; }
+<div class="page-heading"><div><h1>Rutinas</h1><p>Alta, modificación, baja y asignación de rutinas</p></div><a class="button primary" asp-action="Editar"><svg><use href="/img/icons.svg#plus" /></svg>Nueva rutina</a></div>
+<div class="list-toolbar"><form class="searchbar" method="get"><svg><use href="/img/icons.svg#search" /></svg><input name="buscar" value="@ViewBag.Buscar" placeholder="Buscar rutina…" aria-label="Buscar rutinas" /><input type="hidden" name="inactivas" value="@inactivas.ToString().ToLowerInvariant()" /><button class="icon-button" aria-label="Buscar"><svg><use href="/img/icons.svg#arrow" /></svg></button></form><div class="filter-chips"><a class="@(!inactivas ? "selected" : "")" asp-action="Index">Activas · @ViewBag.Activas</a><a class="@(inactivas ? "selected" : "")" asp-action="Index" asp-route-inactivas="true">Dadas de baja · @ViewBag.Inactivas</a></div></div>
+<section class="panel table-panel">
+@if(Model.Count == 0){<div class="empty"><h2>No hay rutinas para mostrar</h2><p>Creá una rutina o probá otro filtro.</p><a class="button primary" asp-action="Editar">Crear rutina</a></div>}
+else
+{
+    <div class="table-wrap"><table><thead><tr><th>Rutina</th><th>Ejercicios</th><th>Alumnos asignados</th><th>Estado</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody>
+    @foreach(var rutina in Model)
+    {
+        var alumnos = asignaciones.Where(a => a.RutinaId == rutina.Id).Select(a => a.Alumno.Nombre).Distinct().ToList();
+        <tr><td><strong>@rutina.Nombre</strong><small>Creada el @rutina.FechaCreacion.ToString("dd/MM/yyyy")</small></td><td>@rutina.Ejercicios.Count</td><td>@(alumnos.Count == 0 ? "Sin asignar" : string.Join(", ", alumnos.Take(2)) + (alumnos.Count > 2 ? " y " + (alumnos.Count - 2) + " más" : ""))</td><td><span class="badge @(rutina.Activa ? "success" : "muted")">@(rutina.Activa ? "Activa" : "Dada de baja")</span></td><td>@if(rutina.Activa){<div class="actions tight"><a class="button secondary small-button" asp-action="Editar" asp-route-id="@rutina.Id">Editar</a><a class="button secondary small-button" asp-action="Asignar" asp-route-id="@rutina.Id">Asignar</a><form asp-action="Eliminar" method="post" data-confirm="¿Dar de baja esta rutina? Sus asignaciones se finalizarán y se conservará el historial."><input type="hidden" name="id" value="@rutina.Id" /><button class="button secondary danger small-button" type="submit">Eliminar</button></form></div>}</td></tr>
+    }
+    </tbody></table></div>
+}
+</section>

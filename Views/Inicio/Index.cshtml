@@ -1,0 +1,60 @@
+@model InicioViewModel
+@{
+    var alumno = User.IsInRole(Roles.Alumno);
+    var entrenador = User.IsInRole(Roles.Entrenador);
+    ViewData["Title"] = alumno || entrenador ? "Inicio" : "Panel de administración";
+    var asignacion = Model.Asignaciones.FirstOrDefault();
+}
+<div class="page-heading"><div><p>@(alumno || entrenador ? Fecha.Hoy.ToString("dddd d 'de' MMMM", System.Globalization.CultureInfo.GetCultureInfo("es-AR")) : "Gestión de usuarios, roles y estados")</p><h1>@(alumno || entrenador ? "Hola, " + Model.Nombre.Split(' ')[0] : "Panel de administración")</h1></div></div>
+@if (alumno)
+{
+    <div class="dashboard-grid">
+        <section class="panel current-routine"><div class="section-heading"><span class="eyebrow">RUTINA VIGENTE</span>@if(asignacion != null){<span class="badge success">Activa</span>}</div><h2>@(asignacion?.Rutina.Nombre ?? "Tu próxima rutina")</h2>
+        @if(asignacion != null)
+        {
+            <p class="muted">Asignada por @asignacion.Rutina.Entrenador.Nombre · del @asignacion.FechaDesde.ToString("dd/MM") @(asignacion.FechaHasta.HasValue ? "al " + asignacion.FechaHasta.Value.ToString("dd/MM") : "en adelante") · @asignacion.Rutina.Ejercicios.Count ejercicios</p>
+            <div class="actions"><form asp-controller="Entrenamientos" asp-action="Comenzar" method="post"><input type="hidden" name="asignacionId" value="@asignacion.Id" /><button class="button primary" type="submit"><svg><use href="/img/icons.svg#play" /></svg>Comenzar entrenamiento</button></form><a class="button secondary" asp-controller="Rutinas" asp-action="MiRutina">Ver mi rutina</a></div>
+        }
+        else {<p class="muted">Cuando tu entrenador te asigne una rutina, aparecerá acá.</p><a class="button secondary" asp-controller="Chat" asp-action="Index">Ir al chat</a>}
+        </section>
+        <section class="panel"><span class="eyebrow">ESTA SEMANA</span><div class="week-stats"><div><strong>@Model.SesionesSemana</strong><small>entrenamientos</small></div><div><strong>@Model.RepeticionesSemana</strong><small>repeticiones</small></div><div><strong class="accent">@(Model.Variacion.HasValue ? Model.Variacion.Value.ToString("+0;-0;0") + "%" : "—")</strong><small>vs. semana anterior</small></div></div><a class="text-link" asp-controller="Historial" asp-action="Index">Ver historial y progreso</a></section>
+        <section class="panel"><div class="section-heading"><h2>Última devolución</h2></div>
+        @if(Model.UltimaDevolucion is { } devolucion)
+        {
+            <div class="feedback-header"><span class="avatar coach">@Presentacion.Iniciales(devolucion.Entrenador.Nombre)</span><div><strong>@devolucion.Entrenador.Nombre</strong><small>Sobre tu entrenamiento del @devolucion.Entrenamiento.Fecha.ToString("dd/MM") · @devolucion.Entrenamiento.NombreRutina</small></div></div><p class="preserve-lines feedback-preview">@devolucion.Texto</p><a class="button secondary small-button" asp-controller="Entrenamientos" asp-action="Detalle" asp-route-id="@devolucion.EntrenamientoId">Ver devolución</a>
+        }
+        else {<p class="muted">Las devoluciones de tu entrenador aparecerán después de tus sesiones.</p>}
+        </section>
+        <section class="panel"><div class="section-heading"><h2>Notificaciones</h2><a class="text-link" asp-controller="Notificaciones" asp-action="Index">Ver todas</a></div>
+        @if(Model.Notificaciones.Count == 0){<p class="muted">No tenés avisos todavía.</p>}
+        @foreach(var aviso in Model.Notificaciones){<a class="list-row notification-preview" href="@(Url.IsLocalUrl(aviso.Enlace) ? aviso.Enlace : Url.Action("Index", "Notificaciones"))"><span class="notification-dot @(!aviso.Leida ? "new" : "")"></span><span><strong>@aviso.Tipo</strong><small>@aviso.Texto</small></span></a>}
+        </section>
+        <section class="panel dashboard-chart"><div class="section-heading"><h2>Evolución semanal</h2><small class="muted">Repeticiones totales por semana</small></div><partial name="_Progreso" model="Model.Semanas" /></section>
+    </div>
+}
+else
+{
+    <div class="stats-grid four">
+        <div class="stat-card"><div><strong>@(entrenador ? Model.Alumnos : Model.Usuarios)</strong><small>@(entrenador ? "alumnos vinculados" : "usuarios registrados")</small></div></div>
+        <div class="stat-card"><div><strong>@(entrenador ? Model.Rutinas : Model.Alumnos)</strong><small>@(entrenador ? "rutinas activas" : "alumnos")</small></div></div>
+        <div class="stat-card"><div><strong class="@(entrenador ? "orange" : "")">@(entrenador ? Model.Pendientes : Model.Entrenadores)</strong><small>@(entrenador ? "entrenamientos sin devolución" : "entrenadores")</small></div></div>
+        <div class="stat-card"><div><strong>@(entrenador ? Model.Ejercicios : Model.Inactivos)</strong><small>@(entrenador ? "ejercicios en la biblioteca" : "cuentas inactivas")</small></div></div>
+    </div>
+    <div class="dashboard-coach">
+        <section class="panel"><div class="section-heading"><h2>@(entrenador ? "Entrenamientos finalizados sin devolución" : "Últimas cuentas creadas")</h2>@if(entrenador){<span class="badge pending">@Model.Pendientes pendientes</span>}else{<a class="text-link" asp-controller="Usuarios" asp-action="Index">Ver todos los usuarios</a>}</div>
+        @if(entrenador)
+        {
+            @if(Model.Recientes.Count == 0){<p class="empty compact">No hay entrenamientos pendientes de devolución.</p>}
+            @foreach(var sesion in Model.Recientes){<div class="list-row"><span class="avatar">@Presentacion.Iniciales(sesion.AsignacionRutina.Alumno.Nombre)</span><span class="grow"><strong>@sesion.AsignacionRutina.Alumno.Nombre</strong><small>@sesion.AsignacionRutina.Alumno.Email</small></span><span class="grow"><strong>@sesion.NombreRutina</strong><small>Finalizado el @sesion.Fecha.ToString("dd/MM/yyyy")</small></span><a class="button primary small-button" asp-controller="Entrenamientos" asp-action="Detalle" asp-route-id="@sesion.Id">Dar devolución</a></div>}
+        }
+        else
+        {
+            @foreach(var usuario in Model.UltimosUsuarios){<a class="list-row" asp-controller="Usuarios" asp-action="Editar" asp-route-id="@usuario.Id"><span class="avatar">@Presentacion.Iniciales(usuario.Nombre)</span><span class="grow"><strong>@usuario.Nombre</strong><small>@usuario.Email</small></span><span class="role-badge" data-role="@usuario.Rol">@(usuario.Rol == Roles.SuperAdmin ? "Super Admin" : usuario.Rol)</span><span class="badge @(usuario.Activo ? "success" : "muted")">@(usuario.Activo ? "Activo" : "Inactivo")</span></a>}
+        }
+        </section>
+        <section class="panel quick-panel"><h2>Accesos rápidos</h2>
+        @if(entrenador){<a class="button secondary" asp-controller="Rutinas" asp-action="Editar">＋ Crear rutina</a><a class="button secondary" asp-controller="Rutinas" asp-action="Index">Asignar rutina</a><a class="button secondary" asp-controller="Alumnos" asp-action="Index" asp-route-asociar="true">Asociar alumno</a><a class="button secondary" asp-controller="Biblioteca" asp-action="Editar">Nuevo ejercicio</a>}
+        else {<a class="button secondary" asp-controller="Usuarios" asp-action="Index">Gestionar usuarios</a><a class="button secondary" asp-controller="Usuarios" asp-action="Editar">Crear usuario</a>}
+        </section>
+    </div>
+}

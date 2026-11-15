@@ -1,0 +1,15 @@
+@model RutinaEjercicio
+@{ ViewData["Title"] = Model.Ejercicio.Nombre; }
+<div class="page-heading"><div><p>Mi rutina › Ejercicio</p><h1>@Model.Ejercicio.Nombre</h1></div></div>
+<div class="technique-layout"><section class="technique-media">
+@if(Model.Ejercicio.Materiales.Count == 0){<div class="media-empty"><svg><use href="/img/icons.svg#book" /></svg><p>Este ejercicio todavía no tiene material adjunto.</p></div>}
+@foreach(var material in Model.Ejercicio.Materiales)
+{
+    <div class="technique-asset">
+    @if(material.Tipo == "Imagen" && material.ArchivoAdjuntoId.HasValue){<img src="@Url.Action("Ver", "Archivos", new { id = material.ArchivoAdjuntoId })" alt="@material.Descripcion" loading="lazy" />}
+    else if(material.Tipo == "Video" && material.ArchivoAdjuntoId.HasValue){<video controls preload="metadata" src="@Url.Action("Ver", "Archivos", new { id = material.ArchivoAdjuntoId })" aria-label="@material.Descripcion"></video>}
+    else if(material.ArchivoAdjuntoId.HasValue){<a class="attachment" asp-controller="Archivos" asp-action="Ver" asp-route-id="@material.ArchivoAdjuntoId" target="_blank" rel="noopener"><svg><use href="/img/icons.svg#attachment" /></svg>@material.Descripcion</a>}
+    else{<a class="attachment" href="@material.ArchivoUrl" target="_blank" rel="noopener noreferrer"><svg><use href="/img/icons.svg#play" /></svg>Ver demostración: @material.Descripcion ↗</a>}
+    </div>
+}
+</section><section class="panel"><h2>Explicación técnica</h2><p class="preserve-lines">@(string.IsNullOrWhiteSpace(Model.Ejercicio.Descripcion) ? "Tu entrenador todavía no agregó una explicación." : Model.Ejercicio.Descripcion)</p><span class="eyebrow">EN TU RUTINA</span><div class="exercise-prescription"><span><strong>@Model.Series</strong>series</span><span><strong>@Model.Repeticiones</strong>repeticiones</span><span><strong>@Model.DescansoSegundos s</strong>descanso</span></div>@if(!string.IsNullOrWhiteSpace(Model.Observaciones)){<p class="technique-note">Observación del entrenador: @Model.Observaciones</p>}<div class="actions"><a class="button secondary" asp-action="MiRutina">← Volver a mi rutina</a></div></section></div>

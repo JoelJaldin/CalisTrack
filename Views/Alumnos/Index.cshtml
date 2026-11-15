@@ -1,0 +1,32 @@
+@model List<VinculoEntrenadorAlumno>
+@{
+    ViewData["Title"] = "Mis alumnos";
+    var disponibles = (List<Alumno>)ViewBag.Disponibles;
+    var asignaciones = (List<AsignacionRutina>)ViewBag.Asignaciones;
+    var ultimos = (Dictionary<int, DateTime>)ViewBag.Ultimos;
+    bool sinRutina = ViewBag.FiltrarSinRutina;
+}
+<div class="page-heading"><div><h1>Mis alumnos</h1><p>Alumnos vinculados a tu cuenta</p></div><button class="button primary" type="button" data-dialog="vincular"><svg><use href="/img/icons.svg#users" /></svg>Asociar alumno</button></div>
+<div class="list-toolbar"><form class="searchbar" method="get"><svg><use href="/img/icons.svg#search" /></svg><input name="buscar" value="@ViewBag.Buscar" placeholder="Buscar alumno…" aria-label="Buscar alumnos" /><input type="hidden" name="sinRutina" value="@sinRutina.ToString().ToLowerInvariant()" /><button class="icon-button" type="submit" aria-label="Buscar"><svg><use href="/img/icons.svg#arrow" /></svg></button></form><div class="filter-chips"><a class="@(!sinRutina ? "selected" : "")" asp-action="Index" asp-route-buscar="@ViewBag.Buscar">Todos · @ViewBag.Total</a><a class="@(sinRutina ? "selected" : "")" asp-action="Index" asp-route-buscar="@ViewBag.Buscar" asp-route-sinRutina="true">Sin rutina · @ViewBag.SinRutina</a></div></div>
+<section class="panel table-panel">
+@if(Model.Count == 0){<div class="empty"><h2>No hay alumnos para mostrar</h2><p>Asociá a un alumno disponible o probá otra búsqueda.</p></div>}
+else
+{
+    <div class="table-wrap"><table><thead><tr><th>Alumno</th><th>Rutina vigente</th><th>Último entrenamiento</th><th>Vínculo</th><th><span class="sr-only">Acciones</span></th></tr></thead><tbody>
+    @foreach(var vinculo in Model)
+    {
+        var alumno = vinculo.Alumno;
+        var rutina = asignaciones.FirstOrDefault(a => a.AlumnoId == alumno.Id);
+        <tr><td><div class="user-cell"><span class="avatar small">@Presentacion.Iniciales(alumno.Nombre)</span><span><strong>@alumno.Nombre</strong><small>@alumno.Email</small></span></div></td><td class="@(rutina == null ? "orange" : "")">@(rutina?.Rutina.Nombre ?? "Sin rutina asignada")</td><td>@(ultimos.TryGetValue(alumno.Id, out var ultima) ? ultima.ToString("dd/MM/yyyy") : "—")</td><td><span class="badge success">Activo</span></td><td><div class="actions tight"><a class="text-link" asp-action="Detalle" asp-route-id="@alumno.Id">Ver perfil</a><form asp-action="Desvincular" method="post" data-confirm="¿Desvincular a este alumno? Sus asignaciones se finalizarán y conservará su historial."><input name="id" value="@vinculo.Id" type="hidden" /><button class="text-button danger" type="submit">Desvincular</button></form></div></td></tr>
+    }
+    </tbody></table></div>
+}
+</section>
+<dialog id="vincular" data-open-on-load="@(Context.Request.Query["asociar"] == "true" ? "true" : "false")"><div class="dialog-heading"><h2>Asociar alumno</h2><button type="button" class="icon-button" data-close-dialog aria-label="Cerrar">×</button></div><p class="muted">Elegí un alumno disponible para vincularlo a tu cuenta.</p>
+@if(disponibles.Count == 0){<p class="empty compact">No hay alumnos disponibles. El alumno puede crear su cuenta desde Registro.</p>}
+else
+{
+    <div class="searchbar"><svg><use href="/img/icons.svg#search" /></svg><input type="search" id="buscar-disponible" placeholder="Buscar por nombre o email…" aria-label="Buscar alumno disponible" /></div>
+    <div class="available-students">@foreach(var alumno in disponibles){<form asp-action="Vincular" method="post" class="list-row" data-student-search="@(alumno.Nombre + " " + alumno.Email)"><input type="hidden" name="alumnoId" value="@alumno.Id" /><span class="avatar small">@Presentacion.Iniciales(alumno.Nombre)</span><span class="grow"><strong>@alumno.Nombre</strong><small>@alumno.Email</small></span><button class="button primary small-button" type="submit">Asociar</button></form>}</div>
+}
+<p class="help">Solo se muestran alumnos activos sin entrenador. No se permiten vínculos duplicados.</p></dialog>
