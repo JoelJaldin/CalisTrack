@@ -35,7 +35,7 @@
 else
 {
     <div class="stats-grid four">
-        <div class="stat-card"><div><strong>@(entrenador ? Model.Alumnos : Model.Usuarios)</strong><small>@(entrenador ? "alumnos vinculados" : "usuarios registrados")</small></div></div>
+        <a class="stat-card" href="@(entrenador ? Url.Action("Index", "Alumnos") : Url.Action("Index", "Usuarios"))"><div><strong>@(entrenador ? Model.Alumnos : Model.Usuarios)</strong><small>@(entrenador ? "alumnos vinculados" : "usuarios registrados")</small></div></a>
         <div class="stat-card"><div><strong>@(entrenador ? Model.Rutinas : Model.Alumnos)</strong><small>@(entrenador ? "rutinas activas" : "alumnos")</small></div></div>
         <div class="stat-card"><div><strong class="@(entrenador ? "orange" : "")">@(entrenador ? Model.Pendientes : Model.Entrenadores)</strong><small>@(entrenador ? "entrenamientos sin devolución" : "entrenadores")</small></div></div>
         <div class="stat-card"><div><strong>@(entrenador ? Model.Ejercicios : Model.Inactivos)</strong><small>@(entrenador ? "ejercicios en la biblioteca" : "cuentas inactivas")</small></div></div>
