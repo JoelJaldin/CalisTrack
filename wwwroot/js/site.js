@@ -19,12 +19,6 @@ document.querySelectorAll('[data-password]').forEach(button => {
         button.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
     });
 });
-document.querySelectorAll('[data-demo]').forEach(button => {
-    button.addEventListener('click', () => {
-        document.getElementById('Email').value = `${button.dataset.demo}@calistrack.local`;
-        document.getElementById('Password').value = 'CalisTrack123!';
-    });
-});
 document.querySelectorAll('[data-dialog]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.dialog).showModal()));
 document.querySelectorAll('[data-close-dialog]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
 document.querySelectorAll('form[data-confirm]').forEach(form => form.addEventListener('submit', event => {
