@@ -532,6 +532,8 @@ body[data-role=Alumno] .chat-window:has(.empty) { min-height: 400px; }
 .notification-row p { font-size: 11px; color: var(--muted); }
 .notification-row .row-icon { color: var(--muted); background: #222733; }
 .notification-row.unread .row-icon { color: var(--primary); background: #2b3a00; }
+.notification-row { position: relative; }
+.notification-open::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
 @media (max-width: 1100px) { .routine-row { grid-template-columns: 1fr 1fr; } .routine-row > .field:last-child { grid-column: 1/-1; } .student-detail-layout { grid-template-columns: minmax(220px,.8fr) minmax(0,1.2fr); } .profile-layout { grid-template-columns: 240px minmax(0,1fr); } .profile-intro { gap: 12px; } }
 @media (max-width: 750px) { .profile-layout, .assignment-layout, .exercise-editor-layout, .user-editor-layout, .student-detail-layout, .feedback-layout { grid-template-columns: 1fr; } .routine-row { grid-template-columns: 1fr; } .routine-row-header { grid-column: auto; } .routine-row > .field:last-child { grid-column: auto; } .routine-builder { padding: 10px 16px; } }
 .history-overview { display: grid; grid-template-columns: minmax(0,2.5fr) minmax(190px,1fr); gap: 20px; align-items: start; }
