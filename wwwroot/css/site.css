@@ -532,7 +532,9 @@ body[data-role=Alumno] .chat-window:has(.empty) { min-height: 400px; }
 .notification-row p { font-size: 11px; color: var(--muted); }
 .notification-row .row-icon { color: var(--muted); background: #222733; }
 .notification-row.unread .row-icon { color: var(--primary); background: #2b3a00; }
-.notification-row { position: relative; }
+.notification-row { position: relative; cursor: pointer; transition: background .15s; }
+.notification-row:hover { background: #232937; }
+.notification-row:focus-within { outline: 3px solid #c8ff2e; outline-offset: 2px; }
 .notification-open { background: none; border: 0; padding: 0; color: inherit; }
 .notification-open::after { content: ""; position: absolute; inset: 0; border-radius: 8px; }
 @media (max-width: 1100px) { .routine-row { grid-template-columns: 1fr 1fr; } .routine-row > .field:last-child { grid-column: 1/-1; } .student-detail-layout { grid-template-columns: minmax(220px,.8fr) minmax(0,1.2fr); } .profile-layout { grid-template-columns: 240px minmax(0,1fr); } .profile-intro { gap: 12px; } }
