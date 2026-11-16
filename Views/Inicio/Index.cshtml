@@ -37,11 +37,11 @@ else
     <div class="stats-grid four">
         <a class="stat-card" href="@(entrenador ? Url.Action("Index", "Alumnos") : Url.Action("Index", "Usuarios"))"><div><strong>@(entrenador ? Model.Alumnos : Model.Usuarios)</strong><small>@(entrenador ? "alumnos vinculados" : "usuarios registrados")</small></div></a>
         <a class="stat-card" href="@(entrenador ? Url.Action("Index", "Rutinas") : Url.Action("Index", "Usuarios", new { rol = Roles.Alumno }))"><div><strong>@(entrenador ? Model.Rutinas : Model.Alumnos)</strong><small>@(entrenador ? "rutinas activas" : "alumnos")</small></div></a>
-        <div class="stat-card"><div><strong class="@(entrenador ? "orange" : "")">@(entrenador ? Model.Pendientes : Model.Entrenadores)</strong><small>@(entrenador ? "entrenamientos sin devolución" : "entrenadores")</small></div></div>
+        <a class="stat-card" href="@(entrenador ? "#sin-devolucion" : Url.Action("Index", "Usuarios", new { rol = Roles.Entrenador }))"><div><strong class="@(entrenador ? "orange" : "")">@(entrenador ? Model.Pendientes : Model.Entrenadores)</strong><small>@(entrenador ? "entrenamientos sin devolución" : "entrenadores")</small></div></a>
         <div class="stat-card"><div><strong>@(entrenador ? Model.Ejercicios : Model.Inactivos)</strong><small>@(entrenador ? "ejercicios en la biblioteca" : "cuentas inactivas")</small></div></div>
     </div>
     <div class="dashboard-coach">
-        <section class="panel"><div class="section-heading"><h2>@(entrenador ? "Entrenamientos finalizados sin devolución" : "Últimas cuentas creadas")</h2>@if(entrenador){<span class="badge pending">@Model.Pendientes pendientes</span>}else{<a class="text-link" asp-controller="Usuarios" asp-action="Index">Ver todos los usuarios</a>}</div>
+        <section class="panel" id="sin-devolucion"><div class="section-heading"><h2>@(entrenador ? "Entrenamientos finalizados sin devolución" : "Últimas cuentas creadas")</h2>@if(entrenador){<span class="badge pending">@Model.Pendientes pendientes</span>}else{<a class="text-link" asp-controller="Usuarios" asp-action="Index">Ver todos los usuarios</a>}</div>
         @if(entrenador)
         {
             @if(Model.Recientes.Count == 0){<p class="empty compact">No hay entrenamientos pendientes de devolución.</p>}
