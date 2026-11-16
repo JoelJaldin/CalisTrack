@@ -101,6 +101,8 @@ hr { border: 0; border-top: 1px solid var(--border); width: 100%; margin: 4px 0;
 .stat-card small { display: block; color: var(--muted); margin-bottom: 5px; font-size: 11px; }
 .stat-card strong { display: block; font-size: 28px; line-height: 1.2; letter-spacing: -1px; }
 .stat-card em { font-size: 14px; font-style: normal; font-weight: 400; letter-spacing: 0; color: var(--muted); }
+a.stat-card { cursor: pointer; transition: border-color .15s, background .15s; }
+a.stat-card:hover { border-color: #c8ff2e; background: #1d222d; }
 .stat-icon, .row-icon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex-shrink: 0; border-radius: 12px; color: #c8ff2e; background: #252e17; }
 .stat-icon.blue { color: #7aa8ff; background: #202a3c; }
 .stat-icon.amber { color: #ffd166; background: #302c23; }
